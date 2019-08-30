@@ -1,0 +1,10 @@
+Package: LPI.KAIRA
+Version: 0.1-5
+Date: 2015-12-11
+Title: Lag Profile Inversion with KAIRA data
+Author: Ilkka Virtanen <ilkka.i.virtanen@oulu.fi>
+Maintainer: Ilkka Virtanen <ilkka.i.virtanen@oulu.fi>
+Description: Lag Profile Inversion using KAIRA klp data
+License: FreeBSD
+Depends: LPI.gdf
+Copyright: University of Oulu, Finland
