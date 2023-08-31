@@ -1,0 +1,128 @@
+#
+# generate the EISCAT VHF beata transmitted waveform from the known
+# code coefficients
+#
+# I. Virtanen 2015
+#
+
+makeBeataWaveform <- function(srate=1)
+    {
+        #
+        # INPUT:
+        #  srate     sample rate in MHz, must be a multiple of 50 kHz
+        #
+        # OUTPUT
+        #  waveform  the waveform vector for a single EISCAT integration period
+        #
+        #
+
+        bitlen <- 20
+        IPP <- 5580
+        Loopc <- 14
+        Sync <- 320 # the EISCAT sync time is in units of 0.1 us
+
+        # read the code coefficients
+        codes <- as.matrix(read.table('beata_v.txt'))
+        ncodes <- nrow(codes)
+        nbits <- ncol(codes)
+
+        # create a matrix for the waveform, this will then be
+        # converted into a vector
+        # the IPP/bitlen may not work with all experiments, but works
+        # with beata!!!
+        waveformmat <- matrix( 0+0i , ncol=ncodes , nrow=IPP/bitlen )
+        for( k in seq( ncodes ) ){
+            waveformmat[ 1:nbits , k ] <- codes[ k ,  ]
+        }
+
+        # then convert in to a vector
+        waveform <- c( waveformmat )
+
+        # repeat as necessary
+        waveform <- rep( waveform , Loopc )
+
+        # upsample to the desired sample rate
+        waveform <- rep( waveform , each = bitlen/srate)
+
+        # add the sync period
+        waveform <- c( waveform , rep( 0 , Sync ) )
+
+        return(waveform)
+
+    }
+
+
+write.gdf <- function( ddc , ddli , ddlr=NULL , fname="data-000001.gdf" , scale=1 )
+    {
+
+        ddr <- Re(ddc) * scale
+        ddi <- Im(ddc) * scale
+        ddi <- bitwOr( bitwShiftL( ddi , 1 ) , as.numeric( abs(ddli) > 0 ) )
+        if(is.null(ddlr)){
+            ddr <- bitwShiftL( ddr , 1 )
+        }else{
+            ddr <- bitwOr( bitwShiftL( ddr , 1 ) , as.numeric( abs(ddlr) > 0 ) )
+        }
+
+        dd <- c( rbind( ddr , ddi ) )
+
+        writeBin( as.integer( dd ) , fname , size=2 , endian='big' )
+
+        return()
+    }
+
+
+writeSamplerLog <- function( srate , file='sampler.log')
+    {
+        #
+        #  INPUT:
+        #    srate  the sample rate in MHz
+        #    file   the log file name
+        #
+        #
+
+        # a fake sampler log file with sample rate informatio
+        cat(sprintf("Sample rate %30.28f MHz\n",srate),file=file)
+
+    }
+
+writeTimestamps <- function( stime , tstep , n=1 , file='timestamps.log')
+    {
+        #
+        # write timestamps log file
+        #
+        #
+        #
+
+        append <- FALSE
+        for (k in seq(n)){
+
+            cat(sprintf("data-%06d.gdf %30.20f 0 0\n",k,(stime+(k-1)*tstep)),file=file,append=append)
+            append <- TRUE
+
+        }
+
+
+
+    }
+
+
+stime <- as.POSIXlt('2015-02-15 19:00:00.000',tz='UTC')
+
+ddir <- paste("beata-V-fake-",format(stime,"%Y.%m.%d_%H.%M.%S"),sep='')
+
+dir.create(ddir)
+dir.create(file.path(ddir,'1'))
+
+srate <- 1
+
+beataWaveform <- makeBeataWaveform(srate=srate)
+
+for (k in seq(10)){
+    fname <- file.path(ddir,'1',sprintf("data-%06d.gdf",k))
+    write.gdf( beataWaveform , beataWaveform , fname=fname )
+}
+
+writeSamplerLog(srate=srate,file=file.path(ddir,'sampler.log'))
+# beata tx starts 82 us after experiment start
+writeTimestamps(stime=stime+82e-6,tstep=length(beataWaveform)/srate*1e-6,n=10,file=file.path(ddir,'1','timestamps.log'))
