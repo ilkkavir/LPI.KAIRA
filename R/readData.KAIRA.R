@@ -31,7 +31,8 @@ readData.KAIRA <- function( dataDir , nBeamlets, beamlets , polarization , files
             rawdata[["idatar"]] <- rep( rawdata[["idatar"]] , each=nBeamlets )
             rawdata[["ndata"]]  <- nd <- sum( n )
             for( k in seq(2,nBeamlets)){
-                rawdata[["cdata"]][1:nd] <- rawdata[["cdata"]][1:nd] + LPI:::mixFrequency( cdata=rawdata[["cdata"]][((k-1)*nd+1):(k*nd)] , ndata=as.integer(nd) , frequency=as.numeric((1-k)/nBeamlets))[["cdata"]]
+                # must mix upwards, because the higher frequencies have been mixed to baseband
+                rawdata[["cdata"]][1:nd] <- rawdata[["cdata"]][1:nd] + LPI:::mixFrequency( cdata=rawdata[["cdata"]][((k-1)*nd+1):(k*nd)] , ndata=as.integer(nd) , frequency=as.numeric((k-1)/nBeamlets))[["cdata"]]
             }
         }
 
