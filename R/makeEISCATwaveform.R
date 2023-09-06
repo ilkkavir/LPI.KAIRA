@@ -13,7 +13,7 @@ EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00
         bitlen <- 20 # 20 us
         IPP <- 5580 # 5580 us
         Loopc <- 14 # loop 14 times
-        Sync <- 320 # 32 us sync time after the 14 reps
+        Sync <- 3200 # 32 us sync time after the 14 reps, counted in 0.1 us steps (copy this directly from elan)
         stimeDiff <- 82 # the first TX starts 82 us after the nominal exp start time
         codefile <- 'beata_v.txt' # file where the codes are stored
         srate <- 1 # sampling rate in MhZ
@@ -58,10 +58,10 @@ EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00
     waveform <- rep( waveform , Loopc )
 
     # upsample to the desired sample rate
-    waveform <- rep( waveform , each = bitlen/srate)
+    waveform <- rep( waveform , each = bitlen*srate)
 
     # add the sync period
-    waveform <- c( waveform , rep( 0 , Sync ) )
+    waveform <- c( waveform , rep( 0 , Sync/10*srate ) )
 
     
     ddir <- paste(exp,"-V-fake-",format(startTime,"%Y.%m.%d_%H.%M.%S"),sep='')
@@ -76,7 +76,7 @@ EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00
     
     writeSamplerLog(srate=srate,file=file.path(ddir,'sampler.log'))
 
-    writeTimestamps(stime=startTime+stimeDiff*1e-6,tstep=length(waveform)/srate*1e-6,n=1,file=file.path(ddir,'1','timestamps.log'))
+    writeTimestamps(stime=as.double(startTime)+stimeDiff*1e-6+1e-6/srate,tstep=length(waveform)/srate*1e-6,n=1,file=file.path(ddir,'1','timestamps.log'))
 
 
 }
