@@ -6,5 +6,6 @@ export(LPI.KAIRA,
        readLPIdata.spherical.KAIRA,
        getDataEndTimes.KAIRA,
        rangeGateSelect.KAIRA,
-       EISCATwaveform
+       EISCATwaveform,
+       LPI.KAIRA.simple
        )

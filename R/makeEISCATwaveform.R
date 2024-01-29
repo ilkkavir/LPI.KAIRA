@@ -6,7 +6,7 @@
 #
 
 
-EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00.000',tz='UTC')){
+EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00.000',tz='UTC'),opath='.'){
 
     expstr <- trimws(tolower(exp))
     if (expstr=='beata'){
@@ -64,7 +64,7 @@ EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00
     waveform <- c( waveform , rep( 0 , Sync/10*srate ) )
 
     
-    ddir <- paste(exp,"-V-fake-",format(startTime,"%Y.%m.%d_%H.%M.%S"),sep='')
+    ddir <- file.path(opath,paste(exp,"-V-fake-",format(startTime,"%Y.%m.%d_%H.%M.%S"),sep=''))
 
     dir.create(ddir)
     dir.create(file.path(ddir,'1'))
@@ -78,6 +78,7 @@ EISCATwaveform <- function(exp='beata',startTime=as.POSIXlt('2015-02-15 19:00:00
 
     writeTimestamps(stime=as.double(startTime)+stimeDiff*1e-6+1e-6/srate,tstep=length(waveform)/srate*1e-6,n=1,file=file.path(ddir,'1','timestamps.log'))
 
+    invisible(fname)
 
 }
 
