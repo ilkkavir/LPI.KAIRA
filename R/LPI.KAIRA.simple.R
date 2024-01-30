@@ -101,7 +101,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
     # create the artificial TX waveform
     stime <- ISOdate(EISCATtime[1],EISCATtime[2],EISCATtime[3],EISCATtime[4],EISCATtime[5],EISCATtime[6],tz='utc')
     # write to opath, because we must have write priviledges there...
-    TXpath  <- makeEISCATwaveform(exp='EISCATexp',startTime=stime,opath=opath)
+    TXpath  <- file.path(EISCATwaveform(exp=EISCATexp,startTime=stime,opath=opath),'1')
 
     # call LPI.KAIRA for each beam direction and polarization separately
     for(pp in c('y','x')){
@@ -126,14 +126,14 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
                 llhT=radarSites()$TRO,
                 llhR=radarSites()$HBA,
                 azelT=c(TXaz,TXele),
-                azelR=c(RXax,RXele[bb+1]),
+                azelR=c(RXaz,RXele[bb+1]),
                 radarFreq=radarFreq,
                 rangeCoverage.deg=rangeCoverage,
                 solver=solver,
                 fakeTX=TRUE,
                 KAIRAoffset.us=KAIRAoffset.us,
                 maxWait.s=0,
-                maxClutterRange.km=maxClutterRange.km,
+                maxClutterRange.km=maxClutterRange,
                 cl=cluster
             )
         }
