@@ -7,19 +7,21 @@
 ## A wrapper to the function LPI.KAIRA::LPI.KAIRA with default parameters based on the experiment names
 ##
 ## Arguments:
-##    KBTexp      name of the KAIRA kbt experiment
-##    EISCATtime  EISCAT experiment start time
-##    btime       analysis start time
-##    etime       analysis end time
-##    datapath    KAIRA data path
-##    opath       output path
-##    cluster     a computer cluster definition (eg from getMPIcluster)
-##    solver      the LPI solver, see documentation of LPI for details
+##    KBTexp        name of the KAIRA kbt experiment
+##    EISCATtime    EISCAT experiment start time
+##    btime         analysis start time
+##    etime         analysis end time
+##    datapath      KAIRA data path
+##    opath         output path
+##    cluster       a computer cluster definition (eg from getMPIcluster)
+##    solver        the LPI solver, see documentation of LPI for details
 ##    rangeCoverage range coverage above and below the nominal beam intersection, degrees in RX beam elevation
+##    pulse2pulse   logical, should pulse-to-pulse lags be included (Default TRUE)
 
-LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , opath , cluster , solver='fishs' , rangeCoverage=5){
+LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , opath , cluster , solver='fishs' , rangeCoverage=5 , pulse2pulse=TRUE){
     
-    
+
+    decodingFilter = 'none'
 
     # experiment specific parameters
     expstr <- trimws(tolower(KBTexp))
@@ -31,12 +33,17 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXaz <- 0
         TXele <- 90
         rlims <- seq(20,300)*20*.299792458/2
-        llims <- c( seq(32)*20 , c( rbind( seq(35)*5580-640 , seq(35)*5580+640 ) ) )
-        maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
         filtLen <- 20
         timeRes <- 5
         freqOffset <- c(RX=32812.5,TX=0)
         radarFreq <- 223.6e6
+        if(pulse2pulse){
+            llims <- c( seq(32)*20 , c( rbind( seq(35)*5580-640 , seq(35)*5580+640 ) ) )
+            maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
+        }else{
+            llims <- seq(32)*20
+            maxr <- rep(Inf,31)
+        }
     }else if(expstr=='vhf37_beata_e_reg'){
         EISCATexp <- 'beata'
         RXaz <- 313.95
@@ -46,7 +53,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(20,300)*20*.299792458/2
         llims <- seq(32)*20
-        maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
+        maxr <- rep(Inf,31)
         filtLen <- 20
         timeRes <- 5
         freqOffset <- c(RX=32812.5,TX=0)
@@ -60,7 +67,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(20,300)*20*.299792458/2
         llims <- seq(32)*20
-        maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
+        maxr <- rep(Inf,31)
         filtLen <- 20
         timeRes <- 5
         freqOffset <- c(RX=32812.5,TX=0)
@@ -73,12 +80,22 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXaz <- 0
         TXele <- 90
         rlims <- seq(166,2224)*2.4*.299792458/2
-        llims <- c( seq(61)*2.4 , c( rbind( seq(127)*1500-146.4 , seq(127)*1500+146.4 ) ) )
-        maxr <- c( rep(Inf,60) , rep(c(0,115),length.out=(length(llims)-61)))
         filtLen <- 2.4
         timeRes <- 4
         freqOffset <- c(RX=14062.5-195312.5,TX=0) # TX is at F10 (224.4 MHz) and we received subbands 124:126 (subband 125 is offset from F10 by 14062.5 Hz and one subband is 195.3125 kHz)
         radarFreq <- 224.4e6
+        if(pulse2pulse){
+            llims <- c( rbind( seq(0,127)*1500 , seq(0,127)*1500+2.4 ) )
+            maxr <- rep(c(115,0),length.out=255)
+            if(solver!='dummy'){
+                print('Swithing to amplitude domain decoding for manda pulse-to-pulse lags')
+            }
+            decodingFilter = 'matched'
+            solver='dummy'
+        }else{
+            llims <- seq(61)*2.4
+            maxr <- rep(Inf,60)
+        }
     }else{
         stop(paste('LPI.KAIRA.simple: unknown experiment',KBTexp))
     }
@@ -134,7 +151,8 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
                 KAIRAoffset.us=KAIRAoffset.us,
                 maxWait.s=0,
                 maxClutterRange.km=maxClutterRange,
-                cl=cluster
+                cl=cluster,
+                decodingFilter = decodingFilter
             )
         }
     }
