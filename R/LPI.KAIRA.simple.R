@@ -81,7 +81,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(166,2224)*2.4*.299792458/2
         filtLen <- 2.4
-        timeRes <- 4
+        timeRes <- 4.8
         freqOffset <- c(RX=14062.5-195312.5,TX=0) # TX is at F10 (224.4 MHz) and we received subbands 124:126 (subband 125 is offset from F10 by 14062.5 Hz and one subband is 195.3125 kHz)
         radarFreq <- 224.4e6
         if(pulse2pulse){
