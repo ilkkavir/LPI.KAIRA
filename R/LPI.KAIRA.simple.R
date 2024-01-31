@@ -32,7 +32,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(20,300)*20*.299792458/2
         llims <- c( seq(32)*20 , c( rbind( seq(35)*5580-640 , seq(35)*5580+640 ) ) )
-        maxr <- c( rep(Inf,31) , rep(c(0,Inf),length.out=(length(llims)-32)))
+        maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
         filtLen <- 20
         timeRes <- 5
         freqOffset <- c(RX=32812.5,TX=0)
@@ -46,7 +46,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(20,300)*20*.299792458/2
         llims <- seq(32)*20
-        maxr <- c( rep(Inf,31) , rep(c(0,Inf),length.out=(length(llims)-32)))
+        maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
         filtLen <- 20
         timeRes <- 5
         freqOffset <- c(RX=32812.5,TX=0)
@@ -60,7 +60,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(20,300)*20*.299792458/2
         llims <- seq(32)*20
-        maxr <- c( rep(Inf,31) , rep(c(0,Inf),length.out=(length(llims)-32)))
+        maxr <- c( rep(Inf,31) , rep(c(0,115),length.out=(length(llims)-32)))
         filtLen <- 20
         timeRes <- 5
         freqOffset <- c(RX=32812.5,TX=0)
@@ -74,7 +74,7 @@ LPI.KAIRA.simple <- function( KBTexp , EISCATtime , btime , etime , datapath , o
         TXele <- 90
         rlims <- seq(166,2224)*2.4*.299792458/2
         llims <- c( seq(61)*2.4 , c( rbind( seq(127)*1500-146.4 , seq(127)*1500+146.4 ) ) )
-        maxr <- c( rep(Inf,60) , rep(c(0,Inf),length.out=(length(llims)-61)))
+        maxr <- c( rep(Inf,60) , rep(c(0,115),length.out=(length(llims)-61)))
         filtLen <- 2.4
         timeRes <- 4
         freqOffset <- c(RX=14062.5-195312.5,TX=0) # TX is at F10 (224.4 MHz) and we received subbands 124:126 (subband 125 is offset from F10 by 14062.5 Hz and one subband is 195.3125 kHz)
